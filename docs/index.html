@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniKernel Agent Demo</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --ink: #132033;
+      --muted: #516177;
+      --panel: #ffffff;
+      --accent: #0f766e;
+      --accent-2: #ea580c;
+      --border: #d6deea;
+      --ok: #166534;
+      --warn: #b45309;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, #d8efe9 0%, transparent 28%),
+        radial-gradient(circle at 90% 0%, #fde6d3 0%, transparent 24%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 28px 18px 42px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #073b4c, #0f766e);
+      color: #f2f8ff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(7, 59, 76, 0.24);
+    }
+
+    h1 { margin: 0 0 10px; font-size: clamp(1.5rem, 3vw, 2.3rem); }
+    h2 { margin: 0 0 12px; font-size: 1.2rem; }
+    p { margin: 0; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .mt16 { margin-top: 16px; }
+
+    .kpi {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .muted { color: var(--muted); }
+
+    .flow {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .step {
+      flex: 1 1 180px;
+      min-height: 88px;
+      border-radius: 12px;
+      border: 1px dashed #b9c7dc;
+      background: #f8fbff;
+      padding: 10px;
+      opacity: .55;
+      transform: translateY(4px);
+      transition: all .35s ease;
+    }
+
+    .step.active {
+      opacity: 1;
+      transform: translateY(0);
+      border-color: var(--accent);
+      box-shadow: 0 8px 18px rgba(15, 118, 110, 0.16);
+      background: #fff;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 9px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+    }
+
+    button.secondary { background: var(--accent-2); }
+
+    pre {
+      margin: 14px 0 0;
+      background: #081a2f;
+      color: #d6e4ff;
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto;
+      font-size: 0.9rem;
+      min-height: 130px;
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 99px;
+      padding: 3px 10px;
+      font-size: 0.77rem;
+      font-weight: 700;
+      letter-spacing: .02em;
+      margin-bottom: 6px;
+    }
+
+    .ok { background: #dcfce7; color: var(--ok); }
+    .warn { background: #ffedd5; color: var(--warn); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>OmniKernel Agent Demo</h1>
+      <p>This page demonstrates what was built: a Rust agent with Linux eBPF LSM enforcement, signed alert forwarding, license checks, and Wasmtime policy runtime.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Runtime</h2>
+        <div class="kpi">Rust + Aya + Wasmtime</div>
+        <p class="muted">Linux eBPF runtime with non-Linux compile guardrails.</p>
+      </article>
+      <article class="card">
+        <h2>Delivery</h2>
+        <div class="kpi">CI + Package + Pages</div>
+        <p class="muted">GitHub workflows validate, package, and publish documentation demo.</p>
+      </article>
+      <article class="card">
+        <h2>Security Model</h2>
+        <span class="tag ok">Implemented</span>
+        <p class="muted">License gate, HMAC alert signing, whitelist map injection, and LSM hooks.</p>
+      </article>
+    </section>
+
+    <section class="card mt16">
+      <h2>Event Flow Simulator</h2>
+      <p class="muted">This simulates a denied process open/exec event going through the OmniKernel control path.</p>
+
+      <div class="flow" id="flow">
+        <div class="step" data-step="0"><strong>1. License</strong><br />Validate signed license and node identity.</div>
+        <div class="step" data-step="1"><strong>2. eBPF LSM</strong><br />Attach file_open and bprm_check_security hooks.</div>
+        <div class="step" data-step="2"><strong>3. Ring Buffer</strong><br />Read security event from kernel ring buffer.</div>
+        <div class="step" data-step="3"><strong>4. Signed Alert</strong><br />Send HMAC signed payload to mesh hub.</div>
+        <div class="step" data-step="4"><strong>5. Policy Runtime</strong><br />Apply Wasmtime sandbox policy envelope.</div>
+      </div>
+
+      <div class="controls">
+        <button id="play">Run Demo</button>
+        <button class="secondary" id="reset">Reset</button>
+      </div>
+
+      <pre id="log">Ready. Click Run Demo to simulate one security event path.</pre>
+    </section>
+
+    <section class="card mt16">
+      <h2>Useful Files</h2>
+      <p class="muted">Core implementation files in this repository:</p>
+      <ul>
+        <li>src/security/ebpf.rs</li>
+        <li>src/security/alerts.rs</li>
+        <li>src/license.rs</li>
+        <li>scripts/package-release.sh</li>
+      </ul>
+      <span class="tag warn">Note</span>
+      <p class="muted">Stripping symbols raises reverse engineering cost, but cannot make it impossible.</p>
+    </section>
+  </main>
+
+  <script>
+    const steps = [...document.querySelectorAll('.step')];
+    const log = document.getElementById('log');
+    const play = document.getElementById('play');
+    const reset = document.getElementById('reset');
+
+    const lines = [
+      'License check passed for node: demo-node-01',
+      'LSM programs loaded: file_open, bprm_check_security',
+      'Event received: op=exec path=/tmp/unknown.sh verdict=deny',
+      'Alert signed and forwarded to mesh hub endpoint',
+      'WASM policy runtime processed event in audit envelope'
+    ];
+
+    function clearState() {
+      steps.forEach(s => s.classList.remove('active'));
+      log.textContent = 'Ready. Click Run Demo to simulate one security event path.';
+    }
+
+    async function runDemo() {
+      clearState();
+      for (let i = 0; i < steps.length; i++) {
+        steps[i].classList.add('active');
+        log.textContent += `\n${new Date().toISOString()}  ${lines[i]}`;
+        await new Promise(r => setTimeout(r, 650));
+      }
+      log.textContent += '\nDemo completed.';
+    }
+
+    play.addEventListener('click', runDemo);
+    reset.addEventListener('click', clearState);
+  </script>
+</body>
+</html>
