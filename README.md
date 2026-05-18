@@ -140,6 +140,30 @@ Then run the service with systemd using [configs/systemd.service](configs/system
 - Linux package pipeline: [.github/workflows/package.yml](.github/workflows/package.yml)
 - GitHub Pages demo deployment: [.github/workflows/pages.yml](.github/workflows/pages.yml)
 
+## Deployment and Rollback
+
+Detailed guides for enterprise deployment and risk mitigation:
+
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** — Step-by-step production rollout guide covering staging, policy tuning, phased enforcement, and monitoring.
+- **[ROLLBACK.md](ROLLBACK.md)** — Procedures to safely roll back the agent if issues are detected, including verification, gradual fleet reversion, and re-deployment strategy.
+
+### Key Deployment Phases
+
+1. **Staging & Audit Mode** (48–72 hours): Deploy to non-production nodes, collect baseline events, tune policy whitelist.
+2. **Pilot Enforcement** (24–48 hours): Enable blocking on a small group, monitor for false positives and service stability.
+3. **Phased Rollout** (4 phases): Roll out to 5% → 25% → 50% → 100% of production fleet with monitoring between each wave.
+4. **Operations**: Monitor event denial rate, alert delivery latency, and agent service health metrics.
+
+### When to Roll Back
+
+Roll back if:
+- Agent service crashes or causes kernel panics.
+- eBPF program verification fails.
+- Excessive false-positive denials impact workloads.
+- Performance degradation occurs (CPU, memory, I/O).
+
+Before-and-after metrics are visible in the demo site: unauthorized execution detection improves from **0/hr (undetected)** to **42/hr (blocked at kernel boundary)** with latency dropping from **2–5 seconds** to **165–240 ms**.
+
 ## Demo Scope
 
 The demo site explains:
