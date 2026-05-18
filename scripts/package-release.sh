@@ -31,7 +31,7 @@ mkdir -p "${STAGE_DIR}/bin" "${STAGE_DIR}/lib/omnikernel" "${STAGE_DIR}/configs"
 
 pushd "${ROOT_DIR}" >/dev/null
 cargo build --release --bin "${PACKAGE_NAME}"
-./scripts/build-ebpf.sh "${BPF_OUTPUT_DIR}"
+bash ./scripts/build-ebpf.sh "${BPF_OUTPUT_DIR}"
 popd >/dev/null
 
 install -m 0755 "${BIN_PATH}" "${STAGE_DIR}/bin/${PACKAGE_NAME}"
