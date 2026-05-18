@@ -66,6 +66,28 @@ Business benefits:
 - Lower operational risk with repeatable release and startup checks.
 - Better stakeholder transparency through the public demo narrative.
 
+## Role-Based Value
+
+CISO and security leadership:
+
+- Gain stronger confidence in host-level policy enforcement.
+- Improve board-level reporting with clearer control evidence.
+
+SOC and incident response teams:
+
+- Receive high-fidelity, signed host signals for triage.
+- Reduce alert noise by focusing on policy-relevant events.
+
+Platform and SRE teams:
+
+- Use deterministic packaging and service rollout patterns.
+- Minimize environment drift with CI and release automation.
+
+DevOps and engineering teams:
+
+- Shift host policy checks earlier into the release lifecycle.
+- Keep runtime behavior visible through reproducible workflows.
+
 ## Prerequisites
 
 - Linux kernel 5.13 or newer
