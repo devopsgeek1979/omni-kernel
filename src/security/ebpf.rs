@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use aya::{maps::ring_buf::RingBuf, maps::MapData, programs::Lsm, Ebpf};
+use aya::{maps::ring_buf::RingBuf, maps::MapData, programs::Lsm, Btf, Ebpf};
 use std::env;
 use tokio::io::unix::AsyncFd;
 
@@ -23,6 +23,10 @@ impl SecurityRuntime {
         let bpf_path = env::var("OMNIKERNEL_BPF_OBJECT")
             .unwrap_or_else(|_| "/opt/omnikernel-agent/omnikernel_lsm.o".to_string());
 
+        let btf = Btf::from_sys_fs().context(
+            "Failed to load kernel BTF from sysfs; ensure the host exposes BTF data",
+        )?;
+
         let mut bpf = Ebpf::load_file(&bpf_path)
             .with_context(|| format!("Failed to load eBPF object from '{bpf_path}'"))?;
 
@@ -35,7 +39,7 @@ impl SecurityRuntime {
             .context("eBPF program 'omnikernel_file_open' not found in BPF object")?
             .try_into()?;
         file_open
-            .load()
+            .load("file_open", &btf)
             .context("Failed to load 'omnikernel_file_open' LSM program")?;
         file_open
             .attach()
@@ -46,7 +50,7 @@ impl SecurityRuntime {
             .program_mut("omnikernel_exec")
             .context("eBPF program 'omnikernel_exec' not found in BPF object")?
             .try_into()?;
-        exec.load()
+        exec.load("bprm_check_security", &btf)
             .context("Failed to load 'omnikernel_exec' LSM program")?;
         exec.attach()
             .context("Failed to attach 'omnikernel_exec' LSM program")?;
