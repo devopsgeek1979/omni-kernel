@@ -24,7 +24,7 @@ jobs:
       - name: Install packaging dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang llvm libbpf-dev
+          sudo apt-get install -y clang llvm libbpf-dev bpftool
 
       - name: Build release package
         run: ./scripts/package-release.sh

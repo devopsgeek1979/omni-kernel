@@ -15,6 +15,24 @@ mkdir -p "${OUTPUT_DIR}"
 # Locate libbpf headers (adjust path for your distribution).
 LIBBPF_INCLUDE="${LIBBPF_INCLUDE:-/usr/include}"
 
+VMLINUX_HEADER="ebpf/vmlinux.h"
+
+if [[ ! -f "${VMLINUX_HEADER}" ]]; then
+  if ! command -v bpftool >/dev/null 2>&1; then
+    echo "Missing ${VMLINUX_HEADER} and bpftool is not installed." >&2
+    echo "Install bpftool or provide ebpf/vmlinux.h before building." >&2
+    exit 1
+  fi
+
+  if [[ ! -f /sys/kernel/btf/vmlinux ]]; then
+    echo "Kernel BTF file /sys/kernel/btf/vmlinux not found; cannot generate ${VMLINUX_HEADER}." >&2
+    exit 1
+  fi
+
+  echo "Generating ${VMLINUX_HEADER} from kernel BTF..."
+  bpftool btf dump file /sys/kernel/btf/vmlinux format c > "${VMLINUX_HEADER}"
+fi
+
 echo "Building OmniKernel eBPF LSM object..."
 
 clang \
