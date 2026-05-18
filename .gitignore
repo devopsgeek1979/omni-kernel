@@ -1,0 +1,9 @@
+/target/
+/.DS_Store
+
+# Local environment files
+*.env
+*.local
+
+# Rust backup files
+**/*.rs.bk

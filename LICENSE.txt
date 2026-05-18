@@ -1,0 +1,19 @@
+OmniKernel Enterprise License v1.0
+
+Copyright (c) 2026 OmniKernel
+
+This software is licensed for DEMO/EVALUATION use only unless a valid
+commercial enterprise license key is installed.
+
+Without a valid enterprise license:
+- runtime enforcement is limited
+- node scale is restricted
+- production orchestration is disabled
+- commercial redistribution is prohibited
+
+Enterprise features require:
+- signed license token
+- active subscription validation
+- vendor-issued cryptographic entitlement
+
+Unauthorized production usage is prohibited.

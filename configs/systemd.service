@@ -1,0 +1,64 @@
+[Unit]
+Description=OmniKernel Agent — Enterprise Security Runtime
+Documentation=https://docs.omnikernel.io
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/omnikernel-agent/omnikernel-agent
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=15s
+
+# ── Secrets ────────────────────────────────────────────────────────────────
+# Load sensitive variables from a protected file.
+# Create /etc/omnikernel/agent.env owned root:omnikernel, mode 0640.
+#
+# Required variables:
+#   OMNIKERNEL_LICENSE      — enterprise license key
+#   OMNIKERNEL_SIGNING_KEY  — HMAC key for alert authentication (>= 32 chars)
+#
+# Optional variables:
+#   OMNIKERNEL_MESH_HUB_URL        — mesh hub endpoint
+#   OMNIKERNEL_NODE_ID             — override node identifier
+#   OMNIKERNEL_BPF_OBJECT          — path to compiled eBPF object
+#   OMNIKERNEL_WASM_MODULE         — path to WASM policy module
+#   OMNIKERNEL_LICENSE_SERVER_URL  — override cloud license validation URL
+#   RUST_LOG                       — log level (e.g. info, debug)
+EnvironmentFile=/etc/omnikernel/agent.env
+
+# ── Identity ───────────────────────────────────────────────────────────────
+# Run as a dedicated service account.
+# Create with: useradd --system --no-create-home --shell /sbin/nologin omnikernel
+User=omnikernel
+Group=omnikernel
+
+# ── Capabilities ───────────────────────────────────────────────────────────
+# eBPF LSM programs require CAP_BPF + CAP_PERFMON (Linux >= 5.8).
+# CAP_SYS_ADMIN is required on kernels < 5.8 or for BTF-relocation.
+# Remove CAP_SYS_ADMIN from this list once your kernel supports unprivileged BPF loading.
+AmbientCapabilities=CAP_BPF CAP_PERFMON CAP_SYS_ADMIN
+CapabilityBoundingSet=CAP_BPF CAP_PERFMON CAP_SYS_ADMIN
+
+# ── Filesystem hardening ───────────────────────────────────────────────────
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+# Paths the agent must be able to write to.
+ReadWritePaths=/var/lib/omnikernel /var/log/omnikernel /run/omnikernel
+
+# ── Process hardening ──────────────────────────────────────────────────────
+NoNewPrivileges=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX
+RestrictNamespaces=true
+SystemCallFilter=@system-service @network-io bpf perf_event_open
+
+# ── Memory protection ──────────────────────────────────────────────────────
+# Must be false: Wasmtime JIT-compiles WASM modules and needs W^X pages.
+MemoryDenyWriteExecute=false
+
+[Install]
+WantedBy=multi-user.target
+
