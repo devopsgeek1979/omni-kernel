@@ -17,8 +17,26 @@ LIBBPF_INCLUDE="${LIBBPF_INCLUDE:-/usr/include}"
 
 VMLINUX_HEADER="ebpf/vmlinux.h"
 
+resolve_bpftool() {
+  if command -v bpftool >/dev/null 2>&1; then
+    command -v bpftool
+    return 0
+  fi
+
+  local candidate
+  for candidate in /usr/lib/linux-tools/*/bpftool; do
+    if [[ -x "${candidate}" ]]; then
+      echo "${candidate}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 if [[ ! -f "${VMLINUX_HEADER}" ]]; then
-  if ! command -v bpftool >/dev/null 2>&1; then
+  BPFT_TOOL="$(resolve_bpftool || true)"
+  if [[ -z "${BPFT_TOOL}" ]]; then
     echo "Missing ${VMLINUX_HEADER} and bpftool is not installed." >&2
     echo "Install bpftool or provide ebpf/vmlinux.h before building." >&2
     exit 1
@@ -30,7 +48,7 @@ if [[ ! -f "${VMLINUX_HEADER}" ]]; then
   fi
 
   echo "Generating ${VMLINUX_HEADER} from kernel BTF..."
-  bpftool btf dump file /sys/kernel/btf/vmlinux format c > "${VMLINUX_HEADER}"
+  "${BPFT_TOOL}" btf dump file /sys/kernel/btf/vmlinux format c > "${VMLINUX_HEADER}"
 fi
 
 echo "Building OmniKernel eBPF LSM object..."
