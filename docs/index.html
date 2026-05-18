@@ -141,13 +141,33 @@
 
     .ok { background: #dcfce7; color: var(--ok); }
     .warn { background: #ffedd5; color: var(--warn); }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.92rem;
+    }
+
+    .table th,
+    .table td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .table th {
+      background: #eef5ff;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
   <main class="wrap">
     <section class="hero">
       <h1>OmniKernel Agent Demo</h1>
-      <p>This page demonstrates what was built: a Rust agent with Linux eBPF LSM enforcement, signed alert forwarding, license checks, and Wasmtime policy runtime.</p>
+      <p>This page shows the complete customer journey: what was built, which tools are used, how deployment works, and why this investment improves host security operations.</p>
     </section>
 
     <section class="grid">
@@ -159,13 +179,60 @@
       <article class="card">
         <h2>Delivery</h2>
         <div class="kpi">CI + Package + Pages</div>
-        <p class="muted">GitHub workflows validate, package, and publish documentation demo.</p>
+        <p class="muted">GitHub workflows validate code, create release packages, and publish this walkthrough.</p>
       </article>
       <article class="card">
         <h2>Security Model</h2>
         <span class="tag ok">Implemented</span>
         <p class="muted">License gate, HMAC alert signing, whitelist map injection, and LSM hooks.</p>
       </article>
+    </section>
+
+    <section class="card mt16">
+      <h2>Complete Process Visibility</h2>
+      <p class="muted">Every stage from source code to production signal is shown below.</p>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th>Tooling</th>
+            <th>What Happens</th>
+            <th>Customer Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1. Validate</td>
+            <td>Rust, Cargo, GitHub CI</td>
+            <td>Compile and test the codebase before release.</td>
+            <td>Reduces deployment risk and catches regressions early.</td>
+          </tr>
+          <tr>
+            <td>2. Build Kernel Policy</td>
+            <td>clang, libbpf, bpftool</td>
+            <td>Compile eBPF LSM programs and generate kernel interface headers.</td>
+            <td>Ensures kernel-level policy is reproducible and portable.</td>
+          </tr>
+          <tr>
+            <td>3. Package</td>
+            <td>release script, tar, sha256</td>
+            <td>Create a deployable artifact with binary, eBPF object, and service files.</td>
+            <td>Speeds up rollout and governance in controlled environments.</td>
+          </tr>
+          <tr>
+            <td>4. Deploy</td>
+            <td>systemd, environment config</td>
+            <td>Start the agent with licensing, policy, and endpoint settings.</td>
+            <td>Provides a predictable and auditable operating model.</td>
+          </tr>
+          <tr>
+            <td>5. Enforce and Alert</td>
+            <td>eBPF LSM, ring buffer, HMAC alerts</td>
+            <td>Detect and optionally block events, then send signed telemetry.</td>
+            <td>Improves trust in detections and response decision quality.</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
 
     <section class="card mt16">
@@ -186,6 +253,36 @@
       </div>
 
       <pre id="log">Ready. Click Run Demo to simulate one security event path.</pre>
+    </section>
+
+    <section class="card mt16">
+      <h2>Deployment Blueprint</h2>
+      <p class="muted">A practical rollout path for customer environments.</p>
+      <ol>
+        <li>Baseline: enable audit mode on a pilot node group.</li>
+        <li>Observe: review signed alerts for policy tuning.</li>
+        <li>Expand: apply tuned policy to staging and pre-production.</li>
+        <li>Enforce: enable blocking mode for approved workloads.</li>
+        <li>Operate: use CI and package workflows for controlled updates.</li>
+      </ol>
+    </section>
+
+    <section class="card mt16">
+      <h2>Why Customers Invest</h2>
+      <div class="grid">
+        <article class="card">
+          <h2>Security Benefit</h2>
+          <p class="muted">Policy executes at kernel boundaries, where high-risk file and process behavior can be controlled quickly.</p>
+        </article>
+        <article class="card">
+          <h2>Operational Benefit</h2>
+          <p class="muted">Release packaging and systemd deployment reduce manual variation across teams and environments.</p>
+        </article>
+        <article class="card">
+          <h2>Business Benefit</h2>
+          <p class="muted">Higher signal quality and faster triage can lower incident handling cost and downtime exposure.</p>
+        </article>
+      </div>
     </section>
 
     <section class="card mt16">
