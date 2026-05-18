@@ -161,6 +161,79 @@
       background: #eef5ff;
       font-weight: 700;
     }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0c4a6e;
+      margin-bottom: 8px;
+    }
+
+    .cluster {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 10px;
+    }
+
+    .machine {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      background: #fbfdff;
+    }
+
+    .machine h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+
+    .machine p {
+      margin: 3px 0;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .live-head {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    select {
+      border: 1px solid #b7c7db;
+      border-radius: 9px;
+      padding: 8px;
+      font-size: 0.92rem;
+      background: #fff;
+    }
+
+    .statrow {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }
+
+    .stat {
+      background: #f7fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.15rem;
+      color: #0f172a;
+      margin-top: 3px;
+    }
   </style>
 </head>
 <body>
@@ -268,6 +341,74 @@
     </section>
 
     <section class="card mt16">
+      <h2>Machine Demo Across Distros</h2>
+      <p class="muted">Representative hosts that mirror mixed enterprise fleets. This view helps customers visualize where the agent is installed and how enforcement posture varies by environment.</p>
+      <div class="cluster">
+        <article class="machine">
+          <span class="badge">Production</span>
+          <h3>Ubuntu 22.04 LTS</h3>
+          <p>Role: internet-facing API nodes</p>
+          <p>Agent mode: enforce</p>
+          <p>Result: unknown binary execution blocked</p>
+        </article>
+        <article class="machine">
+          <span class="badge">Production</span>
+          <h3>RHEL 9</h3>
+          <p>Role: payment and identity workloads</p>
+          <p>Agent mode: enforce</p>
+          <p>Result: whitelist policy guards sensitive paths</p>
+        </article>
+        <article class="machine">
+          <span class="badge">Staging</span>
+          <h3>Debian 12</h3>
+          <p>Role: release validation</p>
+          <p>Agent mode: audit</p>
+          <p>Result: policy tuning before production rollout</p>
+        </article>
+        <article class="machine">
+          <span class="badge">Cloud</span>
+          <h3>Amazon Linux 2023</h3>
+          <p>Role: autoscaled worker pool</p>
+          <p>Agent mode: enforce</p>
+          <p>Result: signed alerts exported to SOC pipeline</p>
+        </article>
+        <article class="machine">
+          <span class="badge">Private Cloud</span>
+          <h3>SUSE Linux Enterprise 15</h3>
+          <p>Role: internal application platform</p>
+          <p>Agent mode: audit to enforce transition</p>
+          <p>Result: phased cutover with low operational risk</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card mt16">
+      <h2>Live Environment Simulation</h2>
+      <p class="muted">Select a distro profile and run a deployment simulation to see how onboarding, policy activation, and alert handling look in a live customer setup.</p>
+
+      <div class="live-head">
+        <label for="distro">Distro Profile</label>
+        <select id="distro">
+          <option value="ubuntu">Ubuntu 22.04 LTS</option>
+          <option value="rhel">RHEL 9</option>
+          <option value="debian">Debian 12</option>
+          <option value="amzn">Amazon Linux 2023</option>
+          <option value="suse">SUSE Linux Enterprise 15</option>
+        </select>
+        <button id="run-live">Simulate Live Deployment</button>
+      </div>
+
+      <div class="statrow">
+        <div class="stat">Active nodes<strong id="nodes">-</strong></div>
+        <div class="stat">Policy mode<strong id="mode">-</strong></div>
+        <div class="stat">Blocked events/hr<strong id="blocked">-</strong></div>
+        <div class="stat">Mean alert latency<strong id="latency">-</strong></div>
+      </div>
+
+      <pre id="live-log">Ready. Choose a distro profile and run the live deployment simulation.</pre>
+    </section>
+
+    <section class="card mt16">
       <h2>Why Customers Invest</h2>
       <div class="grid">
         <article class="card">
@@ -339,6 +480,13 @@
     const log = document.getElementById('log');
     const play = document.getElementById('play');
     const reset = document.getElementById('reset');
+    const runLive = document.getElementById('run-live');
+    const distro = document.getElementById('distro');
+    const liveLog = document.getElementById('live-log');
+    const nodes = document.getElementById('nodes');
+    const mode = document.getElementById('mode');
+    const blocked = document.getElementById('blocked');
+    const latency = document.getElementById('latency');
 
     const lines = [
       'License check passed for node: demo-node-01',
@@ -347,6 +495,74 @@
       'Alert signed and forwarded to mesh hub endpoint',
       'WASM policy runtime processed event in audit envelope'
     ];
+
+    const fleetProfiles = {
+      ubuntu: {
+        nodes: 120,
+        mode: 'enforce',
+        blocked: 37,
+        latency: '210 ms',
+        logs: [
+          'Bootstrap completed for Ubuntu fleet segment',
+          'Kernel hooks attached: file_open, bprm_check_security',
+          'Whitelist map hydrated from policy registry',
+          'Denied unsigned binary under /tmp on edge node',
+          'Signed alert delivered to SOC mesh endpoint'
+        ]
+      },
+      rhel: {
+        nodes: 84,
+        mode: 'enforce',
+        blocked: 22,
+        latency: '185 ms',
+        logs: [
+          'RHEL node group validated with enterprise license',
+          'Agent service healthy across payment cluster',
+          'Execution policy denied unauthorized script launcher',
+          'Security team acknowledged high-severity alert',
+          'No production process regression detected'
+        ]
+      },
+      debian: {
+        nodes: 46,
+        mode: 'audit',
+        blocked: 0,
+        latency: '230 ms',
+        logs: [
+          'Debian staging nodes enrolled in audit mode',
+          'Policy drift report generated for review',
+          'Observed 14 non-whitelisted test accesses',
+          'Recommended whitelist updates prepared',
+          'Ready for enforce-mode change approval'
+        ]
+      },
+      amzn: {
+        nodes: 210,
+        mode: 'enforce',
+        blocked: 49,
+        latency: '165 ms',
+        logs: [
+          'Auto-scaled Amazon Linux workers registered',
+          'Runtime integrity checks passed on new nodes',
+          'Denied unknown exec during transient workload spike',
+          'Alert stream forwarded to cloud SOC queue',
+          'Fleet remained healthy under scale event'
+        ]
+      },
+      suse: {
+        nodes: 63,
+        mode: 'audit to enforce',
+        blocked: 6,
+        latency: '240 ms',
+        logs: [
+          'SUSE private-cloud rollout started in audit mode',
+          'Policy compatibility checks completed',
+          'Selective enforce mode enabled for critical hosts',
+          'Unauthorized file-open attempts denied on pilot group',
+          'Change board approved wider enforce rollout'
+        ]
+      }
+    };
 
     function clearState() {
       steps.forEach(s => s.classList.remove('active'));
@@ -363,8 +579,24 @@
       log.textContent += '\nDemo completed.';
     }
 
+    async function runLiveSimulation() {
+      const profile = fleetProfiles[distro.value];
+      nodes.textContent = profile.nodes;
+      mode.textContent = profile.mode;
+      blocked.textContent = profile.blocked;
+      latency.textContent = profile.latency;
+
+      liveLog.textContent = 'Starting live deployment simulation...';
+      for (const entry of profile.logs) {
+        await new Promise(r => setTimeout(r, 520));
+        liveLog.textContent += `\n${new Date().toISOString()}  ${entry}`;
+      }
+      liveLog.textContent += '\nSimulation complete.';
+    }
+
     play.addEventListener('click', runDemo);
     reset.addEventListener('click', clearState);
+    runLive.addEventListener('click', runLiveSimulation);
   </script>
 </body>
 </html>
